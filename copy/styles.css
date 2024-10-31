@@ -1,0 +1,105 @@
+/* 基础样式 */
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+h1 {
+  color: #007f8b;
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+h2 {
+  color: #333;
+  font-size: 24px;
+  margin-top: 0;
+}
+
+/* 主卡片布局 */
+.main-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* 视频和 FPS 容器 */
+.video-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+}
+
+canvas {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+}
+
+.fps-display {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 127, 139, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+/* 按钮样式 */
+.mdc-button {
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+  display: block;
+  background-color: #007f8b;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.mdc-button:hover {
+  background-color: #005f6b;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  .main-card {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+}

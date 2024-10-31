@@ -1,0 +1,110 @@
+/* 基础样式 */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #fff; /* 基本背景色 */
+  color: #000; /* 黑色字体 */
+}
+
+.container {
+  width: 100%;
+  max-width: 960px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+h1 {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+p {
+  font-size: 14px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* 主卡片布局 */
+.main-card {
+  background-color: #fff;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+}
+
+/* 视频和 FPS 容器 */
+.video-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+canvas {
+  border: 1px solid #ccc;
+  width: 100%; /* 让 canvas 撑满容器 */
+  height: auto;
+}
+
+.fps-display {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #000;
+  color: #fff;
+  padding: 5px;
+  font-size: 12px;
+}
+
+/* 按钮样式 */
+.mdc-button {
+  display: block;
+  width: 100%;
+  max-width: 150px;
+  margin: 0 auto;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+}
+
+.mdc-button:hover {
+  background-color: #0056b3;
+}
+
+/* 3D 模型展示容器 */
+.model-viewer {
+  width: 100%;
+  height: 600px; /* 让模型区域大一些 */
+  margin-top: 20px;
+  border: 1px solid #ccc;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  h2 {
+    font-size: 16px;
+  }
+
+  .model-viewer {
+    height: 400px;
+  }
+}

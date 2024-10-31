@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <title>面部关键点检测工具</title>
+  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>面部关键点检测工具</h1>
+
+    <!-- 主界面 -->
+    <div class="main-card">
+      <section id="demos" class="invisible">
+        <h2>实时面部检测</h2>
+        <p>请将脸部对准摄像头以获取实时的面部关键点检测结果。<br>点击<b>启用摄像头</b>并授予摄像头访问权限。</p>
+
+        <div id="liveView" class="videoView">
+          <button id="webcamButton" class="mdc-button mdc-button--raised">
+            <span class="mdc-button__ripple"></span>
+            <span class="mdc-button__label">启用摄像头</span>
+          </button>
+          <div class="video-container">
+            <video id="webcam" style="display: none;" autoplay playsinline></video>
+            <canvas class="output_canvas" id="output_canvas"></canvas>
+            <!-- FPS 显示 -->
+            <div id="fpsDisplay" class="fps-display">FPS: 0</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>
