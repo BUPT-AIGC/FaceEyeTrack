@@ -48,6 +48,12 @@ if (hasGetUserMedia()) {
   console.warn("getUserMedia() 不被您的浏览器支持");
 }
 
+// 保持摄像机的初始方向
+let initialCameraRotation = camera.rotation.clone();
+let lastRotationOffsetX = 0;
+let lastRotationOffsetY = 0;
+
+// 在用户启用摄像头时，记录初始的摄像机方向
 function enableCam() {
   if (!faceLandmarker) {
     console.log("还在加载面部标记器，请稍等...");
@@ -60,6 +66,9 @@ function enableCam() {
   } else {
     webcamRunning = true;
     enableWebcamButton.innerText = "禁用摄像头";
+
+    // 记录摄像机的初始方向
+    initialCameraRotation = camera.rotation.clone();
   }
 
   const constraints = { video: true };
@@ -189,7 +198,7 @@ async function predictWebcam() {
         socket.send(JSON.stringify(eyeData));
       }
 
-      // 屏幕坐标系是 0 到 1, 将其映射为 -1 到 1 的范围，用于 Three.js 的投影系统
+      // 计算眼睛中心点的偏移量
       const offsetX = (eyeCenterX - 0.5) * 2;
       const offsetY = (eyeCenterY - 0.5) * 2;
 
@@ -199,10 +208,20 @@ async function predictWebcam() {
       lastEyeCenterX = offsetX;
       lastEyeCenterY = offsetY;
 
-      const cameraMoveSpeed = 0.5;
-      camera.position.x -= deltaX * cameraMoveSpeed;
-      camera.position.y -= deltaY * cameraMoveSpeed;
+      // 获取摄像机的“右向”和“上向”向量
+      const rightDirection = new THREE.Vector3();
+      camera.getWorldDirection(rightDirection); // 获取摄像机朝向
+      rightDirection.crossVectors(camera.up, rightDirection); // 摄像机的右方向
 
+      const upDirection = camera.up.clone(); // 摄像机的上方向
+
+      const cameraMoveSpeed = 0.5;
+
+      // 根据面部移动方向，沿着摄像机的“右向”和“上向”移动摄像机
+      camera.position.addScaledVector(rightDirection, deltaX * cameraMoveSpeed);
+      camera.position.addScaledVector(upDirection, -deltaY * cameraMoveSpeed);
+
+      // 继续让摄像机看向模型中心
       camera.lookAt(scene.position);
       renderer.render(scene, camera);
     }

@@ -20,7 +20,7 @@ wss.on('connection', function connection(ws) {
   console.log('新的客户端已连接');
 
   ws.on('message', function incoming(message) {
-    console.log('收到消息:', message);
+    // console.log('收到消息:', message);
 
     // 将消息广播给所有其他连接的客户端
     wss.clients.forEach(function each(client) {
