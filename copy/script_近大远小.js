@@ -12,9 +12,20 @@ const videoWidth = 480;
 let lastFrameTime = 0;
 let frameCount = 0;
 let fps = 0;
-
-// 获取 FPS 显示的 DOM 元素
 const fpsDisplay = document.getElementById("fpsDisplay");
+
+// 摄像机控制相关变量
+let baseCameraZ = 5; // 摄像机的初始距离
+let minCameraZ = 1; // 最小摄像机距离
+let maxCameraZ = 10; // 最大摄像机距离
+let zoomFactor = 0.0001; // 缩放因子，控制摄像机距离变化的灵敏度
+
+// 用于面积变化判断的变量
+let lastArea = null; // 用于存储上一帧的三角形面积
+
+// 眼睛位置用于摄像机旋转的变量
+let lastEyeCenterX = 0;
+let lastEyeCenterY = 0;
 
 async function createFaceLandmarker() {
   const filesetResolver = await FilesetResolver.forVisionTasks(
@@ -69,37 +80,17 @@ function enableCam() {
   });
 }
 
+// 计算三角形面积函数
+function calculateTriangleArea(p1, p2, p3) {
+  return Math.abs(
+    (p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y)) / 2
+  );
+}
+
 // 实时预测
 let lastVideoTime = -1;
 let results = undefined;
 const drawingUtils = new DrawingUtils(canvasCtx);
-
-// 眼睛中点相对于物理摄像头的位置
-let lastEyeCenterX = 0;
-let lastEyeCenterY = 0;
-
-let socket;
-
-// 初始化 WebSocket
-function initWebSocket() {
-  socket = new WebSocket('ws://localhost:8060'); // 连接到 WebSocket 服务器
-
-  socket.onopen = () => {
-    console.log('WebSocket 连接已打开');
-  };
-
-  socket.onclose = () => {
-    console.log('WebSocket 连接已关闭');
-    // 可以添加重连逻辑
-  };
-
-  socket.onerror = (error) => {
-    console.error('WebSocket 错误:', error);
-  };
-}
-
-// 调用初始化 WebSocket
-initWebSocket();
 
 async function predictWebcam() {
   const radio = video.videoHeight / video.videoWidth;
@@ -134,7 +125,7 @@ async function predictWebcam() {
 
   if (results.faceLandmarks) {
     for (const landmarks of results.faceLandmarks) {
-      // 绘制面部关键点 (注意关键点的翻转处理)
+      // 绘制面部关键点
       drawingUtils.drawConnectors(
         landmarks,
         FaceLandmarker.FACE_LANDMARKS_TESSELATION,
@@ -171,25 +162,33 @@ async function predictWebcam() {
         { color: "#E0E0E0" }
       );
 
-      // ---- 获取眼睛的位置，并模拟摄像头移动 ----
-      const leftEye = landmarks[473];  // 左眼索引
-      const rightEye = landmarks[468]; // 右眼索引
+      // ---- 计算三角形面积 ----
+      const leftEye = landmarks[473];  // 左眼坐标
+      const rightEye = landmarks[468]; // 右眼坐标
+      const noseTip = landmarks[1];    // 鼻尖坐标
 
+      const area = calculateTriangleArea(
+        { x: leftEye.x * canvasElement.width, y: leftEye.y * canvasElement.height },
+        { x: rightEye.x * canvasElement.width, y: rightEye.y * canvasElement.height },
+        { x: noseTip.x * canvasElement.width, y: noseTip.y * canvasElement.height }
+      );
+
+      // 如果之前有记录面积，计算变化率
+      if (lastArea != null) {
+        const areaChange = area - lastArea;
+
+        // 根据面积变化调整摄像机距离
+        const adjustedCameraZ = camera.position.z - areaChange * zoomFactor;
+        camera.position.z = Math.min(maxCameraZ, Math.max(minCameraZ, adjustedCameraZ));
+      }
+
+      lastArea = area; // 更新上一帧的面积
+
+      // ---- 基于眼睛中点调整虚拟摄像机的旋转 ----
       const eyeCenterX = (leftEye.x + rightEye.x) / 2;
       const eyeCenterY = (leftEye.y + rightEye.y) / 2;
 
-      // 构建要发送的数据
-      const eyeData = {
-        eyeCenterX: eyeCenterX,
-        eyeCenterY: eyeCenterY
-      };
-
-      // 如果 WebSocket 连接已经打开，则发送数据
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(eyeData));
-      }
-
-      // 屏幕坐标系是 0 到 1, 将其映射为 -1 到 1 的范围，用于 Three.js 的投影系统
+      // 计算水平和垂直方向的偏移
       const offsetX = (eyeCenterX - 0.5) * 2;
       const offsetY = (eyeCenterY - 0.5) * 2;
 
@@ -199,10 +198,12 @@ async function predictWebcam() {
       lastEyeCenterX = offsetX;
       lastEyeCenterY = offsetY;
 
+      // 根据眼睛位置变化调整摄像机位置
       const cameraMoveSpeed = 0.5;
       camera.position.x -= deltaX * cameraMoveSpeed;
       camera.position.y -= deltaY * cameraMoveSpeed;
 
+      // 渲染场景
       camera.lookAt(scene.position);
       renderer.render(scene, camera);
     }
